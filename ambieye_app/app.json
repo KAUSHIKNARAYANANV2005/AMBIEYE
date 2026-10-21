@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ambi Eye",
     "slug": "ambi-eye",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "scheme": "ambi-eye",
@@ -10,6 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.meheer17.ambieye",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
