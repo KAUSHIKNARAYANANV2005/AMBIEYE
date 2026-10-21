@@ -1,0 +1,375 @@
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { patientService } from "@/services/api/patientService";
+
+interface ProfileData {
+  id: string;
+  fullName: string;
+  username: string;
+  email: string;
+  phone?: string;
+  age?: string;
+  gender?: string;
+  fatherName?: string;
+  motherName?: string;
+  address?: string;
+}
+
+export default function EditProfileScreen() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileData>({
+    id: "",
+    fullName: "",
+    username: "",
+    email: "",
+    phone: "",
+    age: "",
+    gender: "",
+    fatherName: "",
+    motherName: "",
+    address: "",
+  });
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await patientService.getProfile();
+        if (response.success) {
+          setProfileData(response.profile);
+        } else {
+          Alert.alert("Error", response.message || "Failed to fetch profile data");
+          router.back();
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        Alert.alert("Error", "An unexpected error occurred. Please try again.");
+        router.back();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [router]);
+
+  const handleUpdateProfile = async () => {
+    // Basic validation
+    if (!profileData.fullName.trim()) {
+      Alert.alert("Error", "Full name cannot be empty");
+      return;
+    }
+
+    if (!profileData.email.trim()) {
+      Alert.alert("Error", "Email cannot be empty");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const response = await patientService.updateProfile({
+        id: profileData.id,
+        fullName: profileData.fullName,
+        username: profileData.username,
+        email: profileData.email,
+        phone: profileData.phone ?? "",
+        age: profileData.age ?? "",
+        gender: profileData.gender ?? "",
+        fatherName: profileData.fatherName ?? "",
+        motherName: profileData.motherName ?? "",
+        address: profileData.address ?? ""
+      });
+
+      if (response.success) {
+        Alert.alert("Success", "Profile updated successfully", [
+          {
+            text: "OK",
+            onPress: () => router.back(),
+          },
+        ]);
+      } else {
+        Alert.alert("Error", response.message || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0EA5E9" />
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: "Edit Profile",
+        }}
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>Personal Information</Text>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.fullName}
+              onChangeText={(text) => setProfileData({ ...profileData, fullName: text })}
+              placeholder="Enter your full name"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Username</Text>
+            <TextInput
+              style={[styles.input, styles.disabledInput]}
+              value={profileData.username}
+              editable={false}
+            />
+            <Text style={styles.helperText}>Username cannot be changed</Text>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.email}
+              onChangeText={(text) => setProfileData({ ...profileData, email: text })}
+              placeholder="Enter your email"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Age</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.age}
+              onChangeText={(text) => setProfileData({ ...profileData, age: text })}
+              placeholder="Your age"
+              placeholderTextColor="#aaa"
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Gender</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.gender}
+              onChangeText={(text) => setProfileData({ ...profileData, gender: text })}
+              placeholder="Your gender"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>Contact Information</Text>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Phone Number</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.phone}
+              onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
+              placeholder="Enter your phone number"
+              placeholderTextColor="#aaa"
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Address</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.address}
+              onChangeText={(text) => setProfileData({ ...profileData, address: text })}
+              placeholder="Enter your address"
+              placeholderTextColor="#aaa"
+              multiline={true}
+              numberOfLines={3}
+            />
+          </View>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>Family Information</Text>
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Father&apos;s Name</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.fatherName}
+              onChangeText={(text) => setProfileData({ ...profileData, fatherName: text })}
+              placeholder="Father's name"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Mother&apos;s Name</Text>
+            <TextInput
+              style={styles.input}
+              value={profileData.motherName}
+              onChangeText={(text) => setProfileData({ ...profileData, motherName: text })}
+              placeholder="Mother's name"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => router.back()}
+              disabled={isSaving}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.saveButton, isSaving && styles.disabledButton]}
+              onPress={handleUpdateProfile}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.saveButtonText}>Save Changes</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+  },
+  contentContainer: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+  },
+  formGroup: {
+    marginBottom: 18,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+    letterSpacing: 0.3,
+  },
+  input: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
+    color: "#111827",
+  },
+  disabledInput: {
+    backgroundColor: "#F9FAFB",
+    color: "#9CA3AF",
+    borderColor: "#F3F4F6",
+  },
+  helperText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 5,
+    marginLeft: 2,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 30,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 14,
+    padding: 14,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+  },
+  cancelButtonText: {
+    color: "#6B7280",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: "#0EA5E9",
+    borderRadius: 14,
+    padding: 14,
+    alignItems: "center",
+    shadowColor: "#0EA5E9",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+  disabledButton: {
+    backgroundColor: "rgba(14,165,233,0.4)",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+    marginTop: 8,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  sectionHeaderText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+});

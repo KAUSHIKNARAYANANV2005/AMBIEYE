@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "Ambi Eye",
+    "slug": "ambi-eye",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "scheme": "ambi-eye",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.meheer17.ambieye",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logowithbg.png",
+        "backgroundColor": "#0D0145"
+      },
+      "package": "com.meheer17.ambieye"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Ambi Eye to access your camera for eye movement recording during exercises.",
+          "microphonePermission": "Allow Ambi Eye to access your microphone for video recording during exercises.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F172A",
+          "image": "assets/images/logo.png",
+          "imageWidth": 260,
+          "imageResizeMode": "contain"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-web-browser",
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b2c51b49-b94f-4c6d-a342-26e06dcc8092"
+      }
+    }
+  }
+}
